@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>__TITLE__</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  body{font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+       color:#1f2430;background:#fbfcfe;margin:0;padding:28px 22px}
+  .wrap{max-width:860px;margin:0 auto}
+  h1{font-size:21px;margin:0 0 14px}
+  .mermaid{display:flex;justify-content:center;background:#fff;border:1px solid #e3e7ee;
+           border-radius:12px;padding:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>__TITLE__</h1>
+  <div class="mermaid">
+__MERMAID__
+  </div>
+</div>
+<script>mermaid.initialize({startOnLoad:true,theme:"base",
+  themeVariables:{fontSize:"14px",fontFamily:"-apple-system,Segoe UI,Roboto,sans-serif"},
+  flowchart:{curve:"basis",nodeSpacing:38,rankSpacing:42}});</script>
+</body>
+</html>
