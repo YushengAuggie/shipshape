@@ -72,8 +72,10 @@ For non-trivial diffs, invoke `/crew` if available; else apply the lenses in
 user. Skip with a one-line note for trivial diffs.
 
 ### Phase 5 — Gate (no-mistakes)
-Ensure preconditions: work committed, on a **feature branch** (not the default branch), and the
-repo initialized (`no-mistakes init` if it has not been). Then **invoke the installed
+Ensure preconditions, setting them up **automatically — never make the user run setup by hand**:
+work committed; on a **feature branch** (not the default branch — create one if needed); and the
+repo gated. To check the gate: if `git remote` has no `no-mistakes` remote, run `no-mistakes init`
+yourself first (it is non-interactive and uses `origin`). Then **invoke the installed
 `no-mistakes` skill** (`/no-mistakes`) with the Phase 0 intent — it owns the correct sequence
 (it pushes the branch through the gate remote, then drives `no-mistakes axi run --intent …`).
 Do **not** re-encode that logic here.
