@@ -80,6 +80,20 @@ yourself first (it is non-interactive and uses `origin`). Then **invoke the inst
 (it pushes the branch through the gate remote, then drives `no-mistakes axi run --intent …`).
 Do **not** re-encode that logic here.
 
+**Make the gate reliable (part of setup):**
+- **Deterministic commands.** If the repo has no `.no-mistakes.yaml`, add one with
+  `commands.test` / `commands.lint` so those steps run real commands instead of a nested AI
+  agent — faster, and it avoids agent kills under sandboxed execution. Detect the repo's real
+  commands (npm/pnpm scripts, Makefile targets, `cargo test`, etc.); if none fit, use a
+  lightweight validity check. (no-mistakes reads `commands.test` / `lint` / `format` from
+  `.no-mistakes.yaml`, run via `sh -c`.)
+- **No CI → skip the ci step.** If the repo has no `.github/workflows`, tell `/no-mistakes` to
+  skip the `ci` step (e.g. `--skip ci`); otherwise the ci-watch step idles forever with no
+  checks to converge on (the PR is already opened by the `pr` step).
+- **Transient agent blips.** The `review` and `document` steps always use the AI agent. A
+  `signal: killed` / `daemon shutting down` on those is usually an environment hiccup — rerun
+  once before treating it as a real failure.
+
 - Relay every `ask-user` finding to the user **verbatim** (id, file, description); translate
   their decision into the gate's approve / fix / skip response. Let `auto-fix` findings apply.
 - Loop until an `outcome:`. On `failed` / `cancelled`, fix on the same branch and rerun.
