@@ -87,9 +87,14 @@ Do **not** re-encode that logic here.
   commands (npm/pnpm scripts, Makefile targets, `cargo test`, etc.); if none fit, use a
   lightweight validity check. (no-mistakes reads `commands.test` / `lint` / `format` from
   `.no-mistakes.yaml`, run via `sh -c`.)
-- **No CI → skip the ci step.** If the repo has no `.github/workflows`, tell `/no-mistakes` to
-  skip the `ci` step (e.g. `--skip ci`); otherwise the ci-watch step idles forever with no
-  checks to converge on (the PR is already opened by the `pr` step).
+- **No CI → trust the `axi run` return, not `axi status`.** `axi run --skip ci` does **not**
+  work (the pipeline is started by the push, so the run's step plan is already fixed). You don't
+  need it: for a repo with no CI, "no failing checks" counts as green, so the driving `axi run`
+  (and the `/no-mistakes` skill) **returns `outcome: checks-passed`** once the PR is opened —
+  that is terminal success (Phase 7). Do **not** judge success by polling `no-mistakes axi
+  status`: it keeps the background CI monitor at `ci: running` with no `outcome:` line even after
+  `checks-passed` was returned. The lingering monitor is harmless; `no-mistakes axi abort` tidies
+  it if you want.
 - **Transient agent blips.** The `review` and `document` steps always use the AI agent. A
   `signal: killed` / `daemon shutting down` on those is usually an environment hiccup — rerun
   once before treating it as a real failure.
