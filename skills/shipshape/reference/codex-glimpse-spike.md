@@ -31,9 +31,9 @@ Sandbox flag used: `--dangerously-bypass-approvals-and-sandbox` (plus `--skip-gi
 ## Codex stdout (relevant line)
 
 ```
-exec /bin/zsh -lc 'printf ... && glimpse publish codex-probe "Codex CDP probe" /tmp/codex-probe.html' in ~/Workspace
+exec /bin/zsh -lc 'printf ... && glimpse publish codex-probe "Codex CDP probe" /tmp/codex-probe.html' in /Users/yusheng/Workspace
  succeeded in 148ms:
-published → http://127.0.0.1:4321/#codex-probe  (file: ~/.glimpse/artifacts/codex-probe.html)
+published → http://127.0.0.1:4321/#codex-probe  (file: /Users/yusheng/.glimpse/artifacts/codex-probe.html)
 ```
 
 Codex self-reported `Succeeded.` with the `published →` line. Session: gpt-5.5, codex v0.141.0.
@@ -51,9 +51,9 @@ This proves Codex's publish reached the running canvas server, not just wrote a 
 
 ## Environment notes
 
-- `glimpse`: `~/.local/bin/glimpse` (plain CLI). On Codex's `/bin/zsh -lc`
+- `glimpse`: `/Users/yusheng/.local/bin/glimpse` (plain CLI). On Codex's `/bin/zsh -lc`
   login shell, PATH already resolved `glimpse` — no PATH munging needed.
-- `codex`: `~/.local/state/fnm_multishells/.../bin/codex` (v0.141.0), authed via
+- `codex`: `/Users/yusheng/.local/state/fnm_multishells/.../bin/codex` (v0.141.0), authed via
   existing `auth.json`. No interactive auth required.
 - Canvas: server up on `:4321`; Chrome CDP debuggable on `:9222` (default ports).
 - `glimpse shot` warns it is "reusing an existing CDP endpoint" — benign here (the shared

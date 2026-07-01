@@ -17,8 +17,9 @@ mmd=${3:?mermaid file required}
 pin=""
 case " $* " in *" --pin "*) pin=1 ;; esac
 
-# Slugs are often derived from branch names (arch-feat/x) — sanitize for filesystem + URL use.
-safe_slug=$(printf '%s' "$slug" | tr '/ ' '__')
+# Slugs are often derived from branch names (arch-feat/x, foo#bar) — reduce to a
+# filesystem- and URL-fragment-safe token by construction (collapse any run of other chars).
+safe_slug=$(printf '%s' "$slug" | tr -cs 'a-zA-Z0-9-' '_')
 
 [ -f "$TEMPLATE" ] || { echo "template missing: $TEMPLATE" >&2; exit 1; }
 [ -f "$mmd" ] || { echo "mermaid file missing: $mmd" >&2; exit 1; }
@@ -44,11 +45,13 @@ TITLE_ENV="$title" awk -v mfile="$mmd" '
   }
 ' "$TEMPLATE" > "$out"
 
-if command -v glimpse >/dev/null 2>&1 && glimpse publish "$safe_slug" "$title" "$out"; then
+if command -v glimpse >/dev/null 2>&1 && published=$(glimpse publish "$safe_slug" "$title" "$out"); then
   if [ -n "$pin" ]; then
     glimpse pin "$safe_slug" >/dev/null 2>&1 || echo "warning: pin failed for $safe_slug" >&2
   fi
-  echo "canvas: http://127.0.0.1:4321/#$safe_slug"
+  # Echo glimpse's own reported line (real URL + port + artifact path) rather than
+  # constructing a URL — avoids drift if glimpse runs on a non-default port.
+  printf '%s\n' "$published"
 else
   dest="./$safe_slug.html"
   cp "$out" "$dest"

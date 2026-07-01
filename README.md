@@ -33,6 +33,12 @@ tests/lint/docs regardless.
 ## Install (one command)
 
 ```sh
+curl -fsSL https://raw.githubusercontent.com/YushengAuggie/shipshape/main/install.sh | sh
+```
+
+Or clone first, if you prefer:
+
+```sh
 git clone https://github.com/YushengAuggie/shipshape && cd shipshape && ./install.sh
 ```
 

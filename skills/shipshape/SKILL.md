@@ -51,11 +51,11 @@ produce a spec + plan. Otherwise write a short inline plan (goal, files, steps, 
 the plan with the user before building.
 
 ### Phase 2 — Architecture diagram (approval checkpoint)
-Write a Mermaid flowchart of the target design to a `.mmd` file (keep this source in the repo —
-it is the editable truth). Render and pin it:
+Write a Mermaid flowchart of the target design to `docs/diagrams/arch-<branch>.mmd` (keep this
+source in the repo — it is the editable truth). Render and pin it:
 
 ```
-<skill-dir>/assets/render-diagram.sh arch-<branch> "Architecture: <title>" <file.mmd> --pin
+<skill-dir>/assets/render-diagram.sh arch-<branch> "Architecture: <title>" docs/diagrams/arch-<branch>.mmd --pin
 ```
 
 If glimpse is up, ask for approval on the canvas (`glimpse ask`) or in chat. If the user wants
@@ -74,8 +74,10 @@ user. Skip with a one-line note for trivial diffs.
 ### Phase 5 — Gate (no-mistakes)
 Ensure preconditions, setting them up **automatically — never make the user run setup by hand**:
 work committed; on a **feature branch** (not the default branch — create one if needed); and the
-repo gated. To check the gate: if `git remote` has no `no-mistakes` remote, run `no-mistakes init`
-yourself first (it is non-interactive and uses `origin`). Then **invoke the installed
+repo gated. **Requires an `origin` remote:** if `git remote get-url origin` fails, stop and tell
+the user (a fork uses `no-mistakes init --fork-url <url>` — see the spec). Otherwise, if `git
+remote` has no `no-mistakes` remote, run `no-mistakes init` yourself first (non-interactive, uses
+`origin`). Then **invoke the installed
 `no-mistakes` skill** (`/no-mistakes`) with the Phase 0 intent — it owns the correct sequence
 (it pushes the branch through the gate remote, then drives `no-mistakes axi run --intent …`).
 Do **not** re-encode that logic here.
@@ -84,9 +86,10 @@ Do **not** re-encode that logic here.
 - **Deterministic commands.** If the repo has no `.no-mistakes.yaml`, add one with
   `commands.test` / `commands.lint` so those steps run real commands instead of a nested AI
   agent — faster, and it avoids agent kills under sandboxed execution. Detect the repo's real
-  commands (npm/pnpm scripts, Makefile targets, `cargo test`, etc.); if none fit, use a
-  lightweight validity check. (no-mistakes reads `commands.test` / `lint` / `format` from
-  `.no-mistakes.yaml`, run via `sh -c`.)
+  commands in this priority order: `package.json` `scripts.test`/`.lint` → `Makefile` `test`/`lint`
+  targets → `Cargo.toml` (`cargo test`) → `go.mod` (`go test ./...`) → else a lightweight validity
+  check (lint/parse the changed files). (no-mistakes reads `commands.test` / `lint` / `format`
+  from `.no-mistakes.yaml`, run via `sh -c`.)
 - **No CI → trust the `axi run` return, not `axi status`.** `axi run --skip ci` does **not**
   work (the pipeline is started by the push, so the run's step plan is already fixed). You don't
   need it: for a repo with no CI, "no failing checks" counts as green, so the driving `axi run`
@@ -107,16 +110,34 @@ Do **not** re-encode that logic here.
   gate remote starts it. The `/no-mistakes` skill handles this; only relevant if you bypass it.
 
 ### Phase 6 — Post-gate diagram
-The gate may have changed code/docs (auto-fixes). Regenerate from the **final** state: re-render
-the architecture diagram with the same `arch-<branch>` slug (so it updates in place) and render a
-change diagram `change-<branch>` showing what this PR touches. Add both the `.mmd` source and the
-rendered `.html` to the branch and reference them in the PR body, so the PR shows truthful,
-current diagrams and they stay on record.
+The gate auto-fixes in a **disposable worktree** and pushes to the remote — those commits are
+**not in your local tree**. So first **sync to the gated state**: `git fetch origin && git reset
+--hard origin/<branch>`. Only then render, or the diagram will be a pre-fix (stale) one.
+
+Write diagrams under `docs/diagrams/`: re-render the architecture diagram with the same
+`arch-<branch>` slug (updates in place), and render `change-<branch>` — a flowchart of the
+modified files grouped by module, derived from `git diff --stat origin/<default>...HEAD`. Save
+both the `.mmd` source and rendered `.html` (e.g. `docs/diagrams/change-<branch>.{mmd,html}`).
+
+**Landing the diagrams:** the gate already opened the PR. Diagram files are docs-only, so commit
+them and `git push origin <branch>` directly (a docs commit needs no re-gating), then reference
+them via `gh pr edit <n> --body` (append). The PR now shows truthful, current diagrams.
 
 ### Phase 7 — Summary / handoff
-Print the PR link, list any gate auto-fixes (the gate reports a `fixes` table when it applied
-any), and link both diagrams. On `checks-passed`, ask the user to review/merge — the gate opened
-the PR but did not merge it.
+On `checks-passed`, report and hand off (the gate opened the PR but did **not** merge it — ask the
+user to review/merge). Use this shape:
+
+```
+✅ shipshape — checks passed
+PR:        <url>
+Intent:    <one line>
+Gate:      review ✓  test ✓  docs ✓  lint ✓   (auto-fixes: <n or none>)
+Diagrams:  architecture <url-or-path> · change <url-or-path>
+Next:      review & merge the PR
+```
+
+If the gate reported a `fixes` table, list each fix under "auto-fixes" so the user can review what
+changed.
 
 ## Cross-agent notes (Claude Code + Codex)
 

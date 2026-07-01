@@ -83,7 +83,7 @@ intent threading, and the diagram lifecycle. Critically, phase 6 invokes the **u
 
 ## 5. Diagram mechanics (glimpse)
 
-- Diagrams are authored as **Mermaid source (`.md`) + rendered self-contained HTML**, kept
+- Diagrams are authored as **Mermaid source (`.mmd`) + rendered self-contained HTML**, kept
   side-by-side; the source is the editable truth, the HTML is what's published. This matches
   the existing "keep md + html in sync" habit.
 - Publish: `glimpse publish <slug> "<title>" <file.html>`; pin the architecture diagram.

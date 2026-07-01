@@ -2,7 +2,7 @@
 # shipshape installer: installs the skill + ensures no-mistakes; glimpse optional.
 set -eu
 
-REPO_RAW="https://raw.githubusercontent.com/YushengAuggie/shipshape/main"
+REPO="YushengAuggie/shipshape"
 # Resolve skills dir (Claude Code default; override with SHIPSHAPE_SKILLS_DIR for other agents)
 SKILLS_DIR=${SHIPSHAPE_SKILLS_DIR:-"$HOME/.claude/skills"}
 mkdir -p "$SKILLS_DIR/shipshape"
@@ -11,11 +11,12 @@ echo "→ Installing shipshape skill into $SKILLS_DIR/shipshape"
 if [ -d "./skills/shipshape" ]; then
   cp -R ./skills/shipshape/. "$SKILLS_DIR/shipshape/"      # local clone install
 else
-  # remote install: fetch the skill files
-  for f in SKILL.md assets/diagram-template.html assets/render-diagram.sh assets/review-lenses.md; do
-    mkdir -p "$SKILLS_DIR/shipshape/$(dirname "$f")"
-    curl -fsSL "$REPO_RAW/skills/shipshape/$f" -o "$SKILLS_DIR/shipshape/$f"
-  done
+  # remote install: fetch the whole repo so the installed file set can't drift from what
+  # SKILL.md references (mirrors the local-clone copy above — includes assets/ and reference/).
+  tmp=$(mktemp -d)
+  curl -fsSL "https://github.com/$REPO/archive/refs/heads/main.tar.gz" | tar -xz -C "$tmp"
+  cp -R "$tmp"/shipshape-main/skills/shipshape/. "$SKILLS_DIR/shipshape/"
+  rm -rf "$tmp"
 fi
 chmod +x "$SKILLS_DIR/shipshape/assets/render-diagram.sh"
 
@@ -38,5 +39,5 @@ fi
 cat <<'EOF'
 
 ✓ shipshape installed.
-  Next: in a repo, run `no-mistakes init` once, then invoke /shipshape on a change.
+  Next: in any git repo, run  /shipshape <task>  — it initializes no-mistakes automatically.
 EOF
