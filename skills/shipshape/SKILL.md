@@ -51,8 +51,11 @@ produce a spec + plan. Otherwise write a short inline plan (goal, files, steps, 
 the plan with the user before building.
 
 ### Phase 2 — Architecture diagram (approval checkpoint)
-Write a Mermaid flowchart of the target design to `docs/diagrams/arch-<branch>.mmd` (keep this
-source in the repo — it is the editable truth). Render and pin it:
+**Scale to the change** (like Phase 4): for structural or greenfield work, draw the diagram and
+get approval; for a small, localized diff, skip it with a one-line "no architectural change" note.
+When you do draw it, write a Mermaid flowchart of the target design to
+`docs/diagrams/arch-<branch>.mmd` (keep this source in the repo — it is the editable truth). Render
+and pin it:
 
 ```
 <skill-dir>/assets/render-diagram.sh arch-<branch> "Architecture: <title>" docs/diagrams/arch-<branch>.mmd --pin
@@ -145,8 +148,8 @@ changed.
 and is shared to both. Use plain shell commands and skill invocations — no agent-specific tool
 names.
 
-Codex driving the glimpse canvas over CDP is **verified** (see
-`<skill-dir>/reference/codex-glimpse-spike.md`). In normal use, shipshape runs from inside the
-target git repo, so Codex's standard sandbox is sufficient — `glimpse` and `no-mistakes` run as
-ordinary commands. (The spike only needed a sandbox/trusted-dir override because it ran from a
-non-repo scratch directory; that does not apply when shipping a real repo.)
+Codex driving the glimpse canvas over CDP is **verified**. In normal use, shipshape runs from
+inside the target git repo, so Codex's standard sandbox is sufficient — `glimpse` and
+`no-mistakes` run as ordinary commands. If Codex is ever invoked from a non-git directory and
+refuses with "Not inside a trusted directory," add `--skip-git-repo-check` (it relaxes only
+Codex's directory-trust check, not the gate).
